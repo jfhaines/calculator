@@ -1,7 +1,7 @@
-let storeArray = [];
-let currentStore = '';
+let store = [];
 
 let buttons = document.querySelectorAll('.button');
+
 buttons.forEach(button => {
     button.addEventListener('mouseenter', animateMouseEnter);
     button.addEventListener('mouseleave', animateMouseLeave);
@@ -32,19 +32,19 @@ function animateMouseUp(e) {
 
 
 function sum(x, y) {
-    return x + y;
+    return parseFloat(x) + parseFloat(y);
 };
 
 function minus(x, y) {
-    return x - y;
+    return parseFloat(x) - parseFloat(y);
 };
 
 function multiply(x, y) {
-    return x * y;
+    return parseFloat(x) * (y);
 };
 
 function divide(x, y) {
-    return x / y;
+    return parseFloat(x) / parseFloat(y);
 };
 
 
@@ -69,34 +69,6 @@ function operate(x, operator, y) {
 
 
 
-
-function storeInput(input) {
-    if (isNumber(input)) {
-        if (containsOperator(currentStore)) {
-            storeArray.push(currentStore);
-            currentStore = '';
-        }
-        currentStore += input
-
-    } else if (containsOperator(input)) {
-        if (currentStore === '') return;
-        else if (containsOperator(currentStore)) currentStore = input;
-        else {
-            // currentStore contains numbers only
-            storeArray.push(currentStore);
-            currentStore = input;
-        };
-    };
-};
-
-function displayValue(value) {
-    let display = document.querySelector('#display > div');
-    display.textContent = value;
-};
-
-
-
-
 function isNumber(string) {
     if (parseFloat(string)) return true;
     else if (string === '.') return true;
@@ -111,7 +83,46 @@ function containsOperator(string) {
     };
 };
 
+function storeInput(input) {
+    console.log(input)
+    if (isNumber(input)) {
+        if (isNumber(store[store.length - 1])) {
+            store[store.length - 1] += input;
+        } else {
+            store.push(input);
+        };
+    } else if (containsOperator(input)) {
+        if (containsOperator(store[store.length - 1])) {
+            store[store.length - 1] = input
+        } else if (isNumber(store[store.length - 1])) {
+            store.push(input);
+        } else {
+            return;
+        };
+    };
+};
 
+function displayValue(value) {
+    let display = document.querySelector('#display > div');
+    display.textContent = value;
+};
+
+
+
+function operateArray(operator) {
+    let keepLooping = true;
+    let i = 0;
+    while (keepLooping) {
+        if (store[i] === operator) {
+            let result = operate(store[i - 1], store[i], store[i + 1]);
+            store.splice((i - 1), 3, result);
+            i = 0;
+            continue;
+        }
+        i++;
+        if (i >= store.length) keepLooping = false;
+    };
+};
 
 function operateArrayAll() {
     operateArray('*');
@@ -120,21 +131,18 @@ function operateArrayAll() {
     operateArray('-');
 };
 
-function operateArray(operator) {
-    let keepLooping = true;
-    let i = 0;
-    while (keepLooping) {
-        if (storeArray[i] === operator) {
-            let result = operate(storeArray[i - 1], storeArray[i], storeArray[i + 1]);
-            storeArray.splice((i - 1), 3, result);
-            i = 0;
-            continue;
-        }
-        i++;
-        if (i >= storeArray.length) keepLooping = false;
-    };
+function updateForPressEqual() {
+    operateArrayAll();
+    displayValue(store[store.length - 1]);
+    store = [];
 };
 
+
+
+function clear() {
+    store = [];
+    displayValue('');
+};
 
 
 
@@ -147,22 +155,6 @@ function onClick(e) {
         clear()
     } else {
         storeInput(value);
-        displayValue(currentStore);
+        displayValue(store[store.length - 1]);
     };
-};
-
-function updateForPressEqual() {
-    if (isNumber(currentStore)) storeArray.push(parseFloat(currentStore));
-
-    operateArrayAll();
-    displayValue(storeArray[0]);
-    storeArray = [];
-    currentStore = '';
-};
-
-
-function clear() {
-    storeArray = [];
-    currentStore = '';
-    displayValue('');
 };
