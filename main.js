@@ -8,7 +8,7 @@ buttons.forEach(button => {
     button.addEventListener('mousedown', animateMouseDown, {capture: true});
     button.addEventListener('mouseup', animateMouseUp);
 
-    button.addEventListener('click', onClick);
+    button.addEventListener('click', updateClick);
 });
 
 
@@ -71,6 +71,7 @@ function operate(x, operator, y) {
 
 function isNumber(string) {
     if (parseFloat(string)) return true;
+    else if (string === '0') return true;
     else if (string === '.') return true;
     else return false;
 };
@@ -84,16 +85,16 @@ function containsOperator(string) {
 };
 
 function storeInput(input) {
-    console.log(input)
     if (isNumber(input)) {
         if (isNumber(store[store.length - 1])) {
             store[store.length - 1] += input;
         } else {
+
             store.push(input);
         };
     } else if (containsOperator(input)) {
         if (containsOperator(store[store.length - 1])) {
-            store[store.length - 1] = input
+            store[store.length - 1] = input;
         } else if (isNumber(store[store.length - 1])) {
             store.push(input);
         } else {
@@ -124,16 +125,21 @@ function operateArray(operator) {
     };
 };
 
-function operateArrayAll() {
+function calculateValue() {
     operateArray('*');
     operateArray('/');
     operateArray('+');
     operateArray('-');
 };
 
-function updateForPressEqual() {
-    operateArrayAll();
-    displayValue(store[store.length - 1]);
+function updateEquals() {
+    calculateValue();
+
+    let value;
+    if (store[store.length - 1] % 1 > 0) value = store[store.length - 1].toFixed(1);
+    else value = store[store.length - 1];
+
+    displayValue(value);
     store = [];
 };
 
@@ -146,11 +152,10 @@ function clear() {
 
 
 
-function onClick(e) {
+function updateClick(e) {
     let value = e.target.querySelector('div').textContent;
-
     if (value === '=') {
-        updateForPressEqual()
+        updateEquals()
     } else if (value === 'Clear') {
         clear()
     } else {
